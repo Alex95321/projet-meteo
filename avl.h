@@ -10,3 +10,4 @@ Arbre* DoubleRotation_gauche(Arbre *a);
 Arbre* DoubleRotation_droite(Arbre *a);
 Arbre *equiArbre(Arbre *a);
 Arbre *insertAVL(Arbre *a,int e, int v, int *h);
+

@@ -3,6 +3,7 @@
 #include <stdlib.h> 
 #include "liste_ch.h"
 #include "arbre.h"
+#include "arbres.h"
 
 // pour générer les .o -> gcc -c avl.c
 // pour compiler gcc arbre.o abr.o avl.o liste_ch.o meteo_projet.c 
@@ -15,7 +16,7 @@ typedef struct
 int num_station;
 float temp;
 char date[30];
-int pression;
+float pression;
 int vent;
 int alt;
 int hum;
@@ -28,7 +29,8 @@ FILE *output=NULL; //Fichier de sortie
 cellule *tab = NULL;
 Chainon *pliste=NULL;
 Arbre *parbre=NULL;
-Chainon_string *pliste_s=NULL;
+Arbre_string *parbre_s=NULL;
+Chainon_sf *pliste_s=NULL;
 int taille_fich;
 int i;
 char c;
@@ -36,6 +38,8 @@ int cas=0;
 
 int *h=(int *)malloc(sizeof(int));
 *h=0;
+int *h_s=(int *)malloc(sizeof(int));
+*h_s=0;
 printf("Je suis là !\n ");
  // argv[1] vaut t, p, w, h ou m
 // argv[2] vaut 0, 1, 2 ou 3
@@ -46,8 +50,8 @@ if(strcmp(argv[1],"essaih.txt")==0)  cas=1;
 if(strcmp(argv[1],"essaim.txt")==0)  cas=2;
 if(strcmp(argv[1],"essait1.txt")==0)  cas=3;
 if(strcmp(argv[1],"essait2.txt")==0)  cas=4;
-if(strcmp(argv[1],"essait3.txt")==0)  cas=5;
-if(strcmp(argv[1],"essaip.txt")==0)  cas=6;
+if(strcmp(argv[1],"essaip1.txt")==0)  cas=5;
+if(strcmp(argv[1],"essaip2.txt")==0)  cas=6;
 
 switch(cas)
 //if(strcmp(argv[1],"essaih.txt")==0) Les 2 chaines de caracteres sont identiques strcmp return 0
@@ -61,17 +65,14 @@ switch(cas)
 		fscanf(fichier_tri,"%d",&tab[i].alt);
 		//printf(" it %d, stat : %d, alt : %\n",i,tab[i].num_station,tab[i].alt);
  	          // Tri du tableau
-		
-	if (strcmp(argv[2],"avl")==0) parbre=insertAVL(parbre,tab[i].alt,tab[i].num_station,h);
+    if (strcmp(argv[2],"avl")==0) parbre=insertAVL(parbre,tab[i].alt,tab[i].num_station,h);
     else if (strcmp(argv[2],"abr")==0) parbre=InsertABR(parbre,tab[i].alt,tab[i].num_station);
-    else if (strcmp(argv[2],"listch")==0) pliste=addUp(pliste,tab[i].alt,tab[i].num_station); // liste chainée
-	
+    else if (strcmp(argv[2],"listch")==0) pliste=addUp(pliste,tab[i].alt,tab[i].num_station);
 		}
 		printf("Affichage final ! et ecriture dans le fichier de sortie");
-		output= fopen("Altitude.txt","w"); 
+		output= fopen("Altitude.csv","w"); 
 		fprintf(output,"Altitude triées dans l'ordre décroissant pour chaque station \n");
 		fprintf(output,"Altitude n°station \n");
-		
     if ((strcmp(argv[2],"avl")==0) || (strcmp(argv[2],"abr")==0))
 		printArbre(parbre,output);
     else if (strcmp(argv[2],"listch")==0) printList(pliste,output);
@@ -81,12 +82,12 @@ taille_fich=5004;//wc -l essaim.txt -> nb lignes d'un fichier
 tab = malloc(taille_fich*sizeof(cellule)); 
 int max;
 fscanf(fichier_tri,"%d",&tab[0].num_station); 
-fscanf(fichier_tri,"%d",&tab[0].hum);
+fscanf(fichier_tri,"%f",&tab[0].hum);
 max=tab[0].hum;
 for (i=1;i<taille_fich;i++)
 		{
 		fscanf(fichier_tri,"%d",&tab[i].num_station); 
-		fscanf(fichier_tri,"%d",&tab[i].hum);
+		fscanf(fichier_tri,"%f",&tab[i].hum);
 		if (tab[i].num_station==tab[i-1].num_station)
 		{
 			if (tab[i].hum >max) max=tab[i].hum;
@@ -101,7 +102,7 @@ for (i=1;i<taille_fich;i++)
 		};
 }
 		printf("Affichage final ! et ecriture dans le fichier de sortie");
-		output= fopen("Humidite.txt","w"); 
+		output= fopen("Humidite.csv","w"); 
 		fprintf(output,"humidites max triées dans l'ordre décroissant pour chaque station \n");
 		fprintf(output,"humidite n°station \n");
 		if ((strcmp(argv[2],"avl")==0) || (strcmp(argv[2],"abr")==0))
@@ -110,7 +111,7 @@ for (i=1;i<taille_fich;i++)
    break;
 
 case 3 :	//températures 1
-taille_fich=22762;//wc -l essaim.t1 -> nb lignes d'un fichier
+taille_fich=22762;//wc -l essait1 -> nb lignes d'un fichier
 tab = malloc(taille_fich*sizeof(cellule)); 
 float maxi,mini,moy;
 int cpt=1;
@@ -119,7 +120,7 @@ fscanf(fichier_tri,"%f",&tab[0].temp);
 maxi=tab[0].temp;
 mini=tab[0].temp;
 moy=tab[0].temp;
-output= fopen("temp1.txt","w"); 
+output= fopen("temp1.csv","w"); 
 fprintf(output,"températures min,max,moy pour chaque station dans l'ordre croissant du numéro de station\n");
 fprintf(output,"n°station / temp min / temp max / moy  \n");
 
@@ -147,40 +148,172 @@ for (i=1;i<taille_fich;i++)
 }
    break;
 
-case 4 :	// température 2 à revoir 
-taille_fich=1794021;//wc -l essait2.txt -> nb lignes d'un fichier
+ case 4 :
+ 
+ taille_fich=2137539; //wc -l essait2.txt -> nb lignes d'un fichier 
+ 
+//taille_fich=88;
+ 
+ tab = malloc(taille_fich*sizeof(cellule));  
+ 
+ cpt=1; 
+ 
+ fscanf(fichier_tri,"%s",tab[0].date);  
+ 
+ fscanf(fichier_tri,"%f",&tab[0].temp); 
+ 
+ moy=tab[0].temp; 
+ 
+ for (i=1;i<taille_fich;i++) 
+ 
+{
+ 
+ fscanf(fichier_tri,"%s",tab[i].date);  
+ 
+ fscanf(fichier_tri,"%f",&tab[i].temp); 
+ 
+ if (strcmp(tab[i].date,tab[i-1].date)==0) 
+ {
+ 
+ moy+=tab[i].temp; 
+ 
+ cpt++; 
+ 
+}
+ 
+// Tri des max pour chaque station
+ 
+ else{  
+ 
+// nouvelle station détectée
+ 
+ moy=moy/cpt; 
+ if (strcmp(argv[2],"avl")==0) parbre_s=insertAVL_sf(parbre_s,tab[i-1].date,moy,h_s);
+    else if (strcmp(argv[2],"abr")==0) parbre_s=InsertABR_s(parbre_s,tab[i-1].date,moy);
+    else if (strcmp(argv[2],"listch")==0) pliste_s=addDown_sf(pliste_s,tab[i-1].date,moy); 
+ 
+//printf("i: %d ->%s, %f \n",i,tab[i-1].date,moy);
+ 
+ moy=tab[i].temp; // taux d'humidité de la nouvelle station  
+ 
+};
+ 
+}
+ 
+ printf("Affichage final ! et ecriture dans le fichier de sortie"); 
+ 
+ output= fopen("TempMoy.csv","w");  
+ 
+ fprintf(output,"Temperatures moyennestriées dans l'ordre croissant des dates \n"); 
+ 
+ fprintf(output,"date temp moy \n"); 
+ if ((strcmp(argv[2],"avl")==0) || (strcmp(argv[2],"abr")==0))
+		printArbre_s(parbre_s,output);
+    else if (strcmp(argv[2],"listch")==0) printList_sf(pliste_s,output); 
+ break;
+case 5 :
+taille_fich=30914; //pression 1
 tab = malloc(taille_fich*sizeof(cellule)); 
-cpt=1;
-fscanf(fichier_tri,"%s",&tab[0].date); 
-fscanf(fichier_tri,"%f",&tab[0].temp);
-moy=tab[0].temp;
+float maxp,minp,moyp;
+int cptp=1;
+fscanf(fichier_tri,"%d",&tab[0].num_station); 
+fscanf(fichier_tri,"%f",&tab[0].pression);
+maxp=tab[0].pression;
+minp=tab[0].pression;
+moyp=tab[0].pression;
+output= fopen("pressionp1.csv","w"); 
+printf("Prout \n");
+fprintf(output,"pressions min,max,moy pour chaque station dans l'ordre croissant du numéro de station\n");
+fprintf(output,"n°station / presion min / pression max / moy  \n");
+
 for (i=1;i<taille_fich;i++)
 		{
-		fscanf(fichier_tri,"%s",&tab[i].date); 
-		fscanf(fichier_tri,"%f",&tab[i].temp);
-		if (strcmp(tab[i].date,tab[i-1].date)==0)
+		fscanf(fichier_tri,"%d",&tab[i].num_station); 
+		fscanf(fichier_tri,"%f",&tab[i].pression);
+		if (tab[i].num_station==tab[i-1].num_station)
 		{
-			moy+=tab[i].temp;
-			cpt++;
+			if (tab[i].pression >maxp) maxp=tab[i].pression;
+			if (tab[i].pression <minp) minp=tab[i].pression;
+			moyp+=tab[i].pression;
+			cptp++;
 		}
  	          // Tri des max pour chaque station
 		else{ 
 		// nouvelle station détectée
-		moy=moy/cpt;
-		pliste_s=addDown_s(pliste_s,tab[i-1].date,moy);
-		moy=tab[i].temp; // taux d'humidité de la nouvelle station 	
+		moyp=moyp/cptp;
+		fprintf(output,"%d %f %f %f \n",tab[i-1].num_station,minp,maxp,moyp);
+		maxp=tab[i].pression; // taux d'humidité de la nouvelle station 	
+		minp=tab[i].pression;
+		moyp=tab[i].pression;
+		cpt=1;		
 		};
 }
-		printf("Affichage final ! et ecriture dans le fichier de sortie");
-		output= fopen("TempMoy.txt","w"); 
-		fprintf(output,"Temperatures moyennestriées dans l'ordre croissant des dates \n");
-		fprintf(output,"date temp moy \n");
-		printList_s(pliste_s,output);
    break;
-//case 5: //pression 1
-    //taille_fich=
-
-
+   
+case 6 :
+ 
+ taille_fich=2014023; //wc -l essaip2.txt -> nb lignes d'un fichier 
+ 
+//taille_fich=88;
+ 
+ tab = malloc(taille_fich*sizeof(cellule));  
+ 
+ cpt=1; 
+ 
+ fscanf(fichier_tri,"%s",tab[0].date);  
+ 
+ fscanf(fichier_tri,"%f",&tab[0].presion);
+); 
+ 
+ moy=tab[0].pression; 
+ 
+ for (i=1;i<taille_fich;i++) 
+ 
+{
+ 
+ fscanf(fichier_tri,"%s",tab[i].date);  
+ 
+ fscanf(fichier_tri,"%f",&tab[i].pression); 
+ 
+ if (strcmp(tab[i].date,tab[i-1].date)==0) 
+ {
+ 
+ moy+=tab[i].pression; 
+ 
+ cpt++; 
+ 
+}
+ 
+// Tri des max pour chaque station
+ 
+ else{  
+ 
+// nouvelle station détectée
+ 
+ moy=moy/cpt; 
+ if (strcmp(argv[2],"avl")==0) parbre_s=insertAVL_sf(parbre_s,tab[i-1].date,moy,h_s);
+    else if (strcmp(argv[2],"abr")==0) parbre_s=InsertABR_s(parbre_s,tab[i-1].date,moy);
+    else if (strcmp(argv[2],"listch")==0) pliste_s=addDown_sf(pliste_s,tab[i-1].date,moy); 
+ 
+//printf("i: %d ->%s, %f \n",i,tab[i-1].date,moy);
+ 
+ moy=tab[i].pression; // taux d'humidité de la nouvelle station  
+ 
+};
+ 
+}
+ 
+ printf("Affichage final ! et ecriture dans le fichier de sortie"); 
+ 
+ output= fopen("PressionMoy.csv","w");  
+ 
+ fprintf(output,"Pressions moyennes triées dans l'ordre croissant des dates \n"); 
+ 
+ fprintf(output,"date pression moy \n"); 
+ if ((strcmp(argv[2],"avl")==0) || (strcmp(argv[2],"abr")==0))
+		printArbre_s(parbre_s,output);
+    else if (strcmp(argv[2],"listch")==0) printList_sf(pliste_s,output); 
+ break;
 
 
 default : printf("Ce fichier n'existe pas !");

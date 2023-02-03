@@ -22,8 +22,6 @@ int max(int a, int b) {
 int min(int a, int b) {
   return (a < b ? b : a);
 }
-
-
 Arbre *createArbre( int e, int v){
 	Arbre *new1=malloc(sizeof(Arbre));
 	if(new1==NULL){
@@ -39,15 +37,15 @@ Arbre *createArbre( int e, int v){
 }
 
 //Impression Arbre
+//void printArbre(arbre *a,FILE *output){
 void printArbre( Arbre *a, FILE *output){
 	if(a==NULL){
 	printf("\n");
 			}
         else{
-		printArbre(a->fd,output);
+		printArbre(a->fg,output);
 		printf("alt: %d idd: %d",a->val,a->val2);
 		fprintf(output,"%d %d\n",a->val,a->val2);
-		printArbre(a->fg,output);
+		printArbre(a->fd,output);
 		}
 		}
-

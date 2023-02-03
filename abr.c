@@ -1,5 +1,6 @@
 #include "abr.h"
 
+
 Arbre* InsertABR(Arbre *a,int x,int v){
 		if(a==NULL){
 			return createArbre(x,v);
@@ -14,3 +15,4 @@ Arbre* InsertABR(Arbre *a,int x,int v){
 				
 				
 }
+
